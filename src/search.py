@@ -13,7 +13,8 @@ for k in ("GOOGLE_API_KEY", "DATABASE_URL", "LLM_MODEL", "EMBEDDING_MODEL", "PG_
         raise RuntimeError(f"Environment variable {k} is not set")
 
 gemini_llm = ChatGoogleGenerativeAI(
-    model=os.getenv("LLM_MODEL", "gemini-2.5-flash-lite")
+    model=os.getenv("LLM_MODEL", "gemini-2.5-flash-lite"),
+    # temperature=0.5
 )
 
 PROMPT_TEMPLATE = """
@@ -43,6 +44,24 @@ PERGUNTA DO USUÁRIO:
 RESPONDA A "PERGUNTA DO USUÁRIO"
 """
 
+def _generate_prompt_template():
+  return PromptTemplate(
+      template=PROMPT_TEMPLATE,
+      input_variables=["contexto", "pergunta"]
+  )
+
+def _print_results_and_metadata(results):
+  for i, (doc, score) in enumerate(results, start=1):
+    print("-"*50)
+    print(f" Resultado {i} (score: {score:.2f}):")
+    print("\n Texto:\n")
+    print(doc.page_content.strip())
+
+    print("\n Metadados:\n")
+    for k, v in doc.metadata.items():
+        print(f" {k}: {v}")
+  print("\n\n")
+
 def search_prompt(user_input: str):
   print("Iniciando busca...")
   embeddings = GoogleGenerativeAIEmbeddings(
@@ -60,18 +79,16 @@ def search_prompt(user_input: str):
 
   print("Buscando resultados...")
   results = store.similarity_search_with_score(user_input, k=10)
+  
+  _print_results_and_metadata(results)
+
 
   if not results:
     print("Não foi possível iniciar o chat. Verifique os erros de inicialização.")
     return 
   
-  template = PromptTemplate(
-      input_variables=["name"],
-      template=PROMPT_TEMPLATE
-  )
-
-  formatedPrompt = template.format(pergunta=user_input, contexto="\n".join([doc.page_content for doc, _ in results]))
-  print("\n" + formatedPrompt)
-
-  answer_gemini = gemini_llm.invoke(formatedPrompt)
-  return answer_gemini
+  print("Gerando prompt template e enviando ao LLM...")
+  chain = _generate_prompt_template() | gemini_llm
+  result = chain.invoke({"contexto": results, "pergunta": user_input})
+  
+  return result
