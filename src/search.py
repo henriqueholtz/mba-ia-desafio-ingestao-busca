@@ -62,14 +62,13 @@ def _print_results_and_metadata(results):
         print(f" {k}: {v}")
   print("\n\n")
 
-def search_prompt(user_input: str):
-  print("Iniciando busca...")
+def _get_results_from_database(user_input: str):
+  print("\n  Iniciando busca...")
   embeddings = GoogleGenerativeAIEmbeddings(
         model=os.getenv("EMBEDDING_MODEL","models/embedding-001"),
-        google_api_key=os.getenv("GOOGLE_API_KEY")
   )
 
-  print("Conectando ao banco de dados...")
+  print("  Conectando ao banco de dados...")
   store = PGVector(
       embeddings=embeddings,
       collection_name=os.getenv("PG_VECTOR_COLLECTION_NAME"),
@@ -77,17 +76,18 @@ def search_prompt(user_input: str):
       use_jsonb=True,
   )
 
-  print("Buscando resultados...")
+  print("  Buscando resultados...")
   results = store.similarity_search_with_score(user_input, k=10)
-  
-  _print_results_and_metadata(results)
+  return results
 
-
+def search_prompt(user_input: str):
+  results = _get_results_from_database(user_input)
   if not results:
     print("Não foi possível iniciar o chat. Verifique os erros de inicialização.")
     return 
+  # _print_results_and_metadata(results)
   
-  print("Gerando prompt template e enviando ao LLM...")
+  print("  Gerando prompt template e enviando ao LLM...\n")
   chain = _generate_prompt_template() | gemini_llm
   result = chain.invoke({"contexto": results, "pergunta": user_input})
   

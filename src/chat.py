@@ -1,13 +1,11 @@
 from search import search_prompt
 
 def main():
-
-    print("Faça sua pergunta:")
-    user_input = input()
+    user_input = input("Faça sua pergunta: ")
 
     answer_gemini = search_prompt(user_input)
 
-    print("-"*75)
+    print("-"*75, "\n")
     print("PERGUNTA: " + user_input)
     print("RESPOSTA: " + answer_gemini.content)
 
