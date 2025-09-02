@@ -40,9 +40,10 @@ def ingest_pdf():
 
 
     print("Generating embeddings with its document IDs...")
+    # TODO try without ids
     ids = [f"doc-{i}" for i in range(len(enrichedDocs))]
     embeddings = GoogleGenerativeAIEmbeddings(
-        model=os.getenv("EMBEDDING_MODEL","models/embedding-001"),
+        model=os.getenv("EMBEDDING_MODEL"),
         google_api_key=os.getenv("GOOGLE_API_KEY")
     )
 

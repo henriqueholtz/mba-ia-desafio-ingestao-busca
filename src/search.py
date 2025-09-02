@@ -13,8 +13,8 @@ for k in ("GOOGLE_API_KEY", "DATABASE_URL", "LLM_MODEL", "EMBEDDING_MODEL", "PG_
         raise RuntimeError(f"Environment variable {k} is not set")
 
 gemini_llm = ChatGoogleGenerativeAI(
-    model=os.getenv("LLM_MODEL", "gemini-2.5-flash-lite"),
-    # temperature=0.5
+    model=os.getenv("LLM_MODEL"),
+    # temperature=0
 )
 
 PROMPT_TEMPLATE = """
@@ -65,7 +65,7 @@ def _print_results_and_metadata(results):
 def _get_results_from_database(user_input: str):
   print("\n  Iniciando busca...")
   embeddings = GoogleGenerativeAIEmbeddings(
-        model=os.getenv("EMBEDDING_MODEL","models/embedding-001"),
+    model=os.getenv("EMBEDDING_MODEL"),
   )
 
   print("  Conectando ao banco de dados...")
@@ -86,7 +86,7 @@ def search_prompt(user_input: str):
     print("Não foi possível iniciar o chat. Verifique os erros de inicialização.")
     return 
   # _print_results_and_metadata(results)
-  
+
   print("  Gerando prompt template e enviando ao LLM...\n")
   chain = _generate_prompt_template() | gemini_llm
   result = chain.invoke({"contexto": results, "pergunta": user_input})
