@@ -4,11 +4,17 @@ from dotenv import load_dotenv
 
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_postgres import PGVector
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain.prompts import PromptTemplate
 
 load_dotenv()
-for k in ("LLM_API_KEY", "DATABASE_URL", "EMBEDDING_MODEL", "PG_VECTOR_COLLECTION_NAME"):
+for k in ("GOOGLE_API_KEY", "DATABASE_URL", "LLM_MODEL", "EMBEDDING_MODEL", "PG_VECTOR_COLLECTION_NAME"):
     if not os.getenv(k):
         raise RuntimeError(f"Environment variable {k} is not set")
+
+gemini_llm = ChatGoogleGenerativeAI(
+    model=os.getenv("LLM_MODEL", "gemini-2.5-flash-lite")
+)
 
 PROMPT_TEMPLATE = """
 CONTEXTO:
@@ -41,7 +47,7 @@ def search_prompt(user_input: str):
   print("Iniciando busca...")
   embeddings = GoogleGenerativeAIEmbeddings(
         model=os.getenv("EMBEDDING_MODEL","models/embedding-001"),
-        google_api_key=os.getenv("LLM_API_KEY")
+        google_api_key=os.getenv("GOOGLE_API_KEY")
   )
 
   print("Conectando ao banco de dados...")
@@ -55,8 +61,17 @@ def search_prompt(user_input: str):
   print("Buscando resultados...")
   results = store.similarity_search_with_score(user_input, k=10)
 
-  for i, (doc, score) in enumerate(results, start=1):
-      print(f"Resultado {i}: {doc.page_content} (Score: {score})\n")
-      print("-"*75)
+  if not results:
+    print("Não foi possível iniciar o chat. Verifique os erros de inicialização.")
+    return 
   
-  # return results
+  template = PromptTemplate(
+      input_variables=["name"],
+      template=PROMPT_TEMPLATE
+  )
+
+  formatedPrompt = template.format(pergunta=user_input, contexto="\n".join([doc.page_content for doc, _ in results]))
+  print("\n" + formatedPrompt)
+
+  answer_gemini = gemini_llm.invoke(formatedPrompt)
+  return answer_gemini

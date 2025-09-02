@@ -9,7 +9,7 @@ from langchain_core.documents import Document
 from langchain_postgres import PGVector
 
 load_dotenv()
-for k in ("LLM_API_KEY", "DATABASE_URL", "EMBEDDING_MODEL", "PG_VECTOR_COLLECTION_NAME"):
+for k in ("GOOGLE_API_KEY", "DATABASE_URL", "EMBEDDING_MODEL", "PG_VECTOR_COLLECTION_NAME"):
     if not os.getenv(k):
         raise RuntimeError(f"Environment variable {k} is not set")
 
@@ -43,7 +43,7 @@ def ingest_pdf():
     ids = [f"doc-{i}" for i in range(len(enrichedDocs))]
     embeddings = GoogleGenerativeAIEmbeddings(
         model=os.getenv("EMBEDDING_MODEL","models/embedding-001"),
-        google_api_key=os.getenv("LLM_API_KEY")
+        google_api_key=os.getenv("GOOGLE_API_KEY")
     )
 
     print("Storing embeddings in PostgreSQL...")

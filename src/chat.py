@@ -4,15 +4,12 @@ def main():
 
     print("Faça sua pergunta:")
     user_input = input()
-    print("Você perguntou:", user_input)
-    
-    chain = search_prompt(user_input)
 
-    if not chain:
-        print("Não foi possível iniciar o chat. Verifique os erros de inicialização.")
-        return
-    # response = chain.run(user_input)
-    # print("Resposta:", response)
+    answer_gemini = search_prompt(user_input)
+
+    print("-"*75)
+    print("PERGUNTA: " + user_input)
+    print("RESPOSTA: " + answer_gemini.content)
 
 if __name__ == "__main__":
     main()

@@ -24,3 +24,9 @@ To setup and run the project easily you will need to follow these steps:
 ```
 python src/ingest.py
 ```
+
+### 3. Run the chat (CLI)
+
+```
+python src/chat.py
+```
