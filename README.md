@@ -14,18 +14,17 @@ To setup and run the project easily you will need to follow these steps:
 
 ### 1. Environment setup
 
-- Create and activate a virtual environment: `python3 -m venv venv && source venv/Scripts/activate`
 - Create your `.env` file based on `.env.example`: `cp .env.example .env`
 - Setup your Gemini credentials on `.env`
 - Spin up the postgres + pgvector: `docker compose up -d`
 
-### 2. Ingest the PDF into the
+### 2. Ingest the PDF into the vector database
 
 ```
 python src/ingest.py
 ```
 
-### 3. Run the chat (CLI)
+### 3. Run the chat (CLI) and ask your question
 
 ```
 python src/chat.py
