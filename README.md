@@ -26,6 +26,8 @@ python src/ingest.py
 
 ### 3. Run the chat (CLI) and ask your question
 
+Note: some questions like `Qual o faturamento da Empresa SuperTechIABrazil?` is not being answered correctly by default. It answers better if the chunk size is changed from 1000 to 300 and the overlap from 150 to 75.
+
 ```
 python src/chat.py
 ```
